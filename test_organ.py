@@ -11,9 +11,21 @@ Covers each dispatched kind plus the cross-cutting fail-open contract:
 """
 
 import json
+import os
+
 import pytest
 
 from organ import decide, PERSONA_ROLES, DEFAULT_TEAM_PERSONAS
+
+_SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
+
+
+def _run_sample(filename):
+    """Load a committed sample file and run it through ``decide`` exactly as
+    the conformance Action does (ORGAN_INPUT → {state, context})."""
+    with open(os.path.join(_SAMPLES_DIR, filename)) as fh:
+        payload = json.load(fh)
+    return decide(payload["state"], payload.get("context"))
 
 
 # ---------------------------------------------------------------------------
@@ -378,6 +390,118 @@ class TestDeterminism:
         a = json.dumps(decide(json.loads(json.dumps(state))), sort_keys=True)
         b = json.dumps(decide(json.loads(json.dumps(state))), sort_keys=True)
         assert a == b
+
+
+# ---------------------------------------------------------------------------
+# Committed-sample conformance (verdict pins, not just shape)
+#
+# The conformance Action only SHADOW-PRINTS each sample's output to the job
+# summary — a verdict flip on a sample file would slip through CI green. These
+# tests ASSERT the verdict each committed sample must produce, so any change
+# that alters a sample's decision is caught. The drift guard keeps the pin set
+# and the on-disk sample set in lockstep: add/remove a sample without updating
+# the pins and CI goes red.
+# ---------------------------------------------------------------------------
+
+# filename -> the verdict fields that sample must produce.
+_SAMPLE_EXPECTATIONS = {
+    "critique_normalize.json": {
+        "decision_path": "critique:normalized",
+        "confidence": 1.0,
+        "output": {
+            "persona_name": "Jordan",
+            "role": "Finance Director",  # resolved from PERSONA_ROLES
+            "strong_points": ["ROI framed against current spend"],
+            "concerns": [],  # string in input coerced to empty list
+            "critical_changes": ["quantify year-1 savings"],
+        },
+    },
+    "interviewee_failopen.json": {
+        "decision_path": "interviewee_review:fail_open",
+        "confidence": 0.0,
+        "output": {
+            "person_name": "Dana Okoro",
+            "role": "Operations Manager",
+            "agrees": [],
+            "disagrees": [],
+            "missing": [],
+            "quotes": [],
+            "ai_generated": True,
+            "error": "model returned malformed JSON",
+        },
+    },
+    "status_running.json": {
+        # synth pending, 2 completed children padded to 5 with pending →
+        # children_pending=True → overall running via the children path.
+        "decision_path": "status:children_pending",
+        "confidence": 1.0,
+        "output": {"overall": "running", "children_pending": True},
+    },
+    "synthesis_attribution.json": {
+        "decision_path": "synthesis:normalized",
+        "confidence": 1.0,
+        "self_metric_extra": {"change_count": 2, "unlabeled_changes": 1},
+    },
+    "team_review_json_block.json": {
+        # JSON fenced in the summary, no findings → json_block extraction.
+        "decision_path": "team_review:json_block",
+        "confidence": 1.0,
+        "output": {
+            "persona_name": "Matt",
+            "perspective": "CTO / technical risk",
+            "overall_strength": 7,
+            "ai_generated": True,
+        },
+    },
+}
+
+
+class TestSamplesConform:
+    @pytest.mark.parametrize("filename", sorted(_SAMPLE_EXPECTATIONS))
+    def test_sample_verdict(self, filename):
+        exp = _SAMPLE_EXPECTATIONS[filename]
+        r = _run_sample(filename)
+
+        assert r["self_metric"]["decision_path"] == exp["decision_path"], (
+            f"{filename}: decision_path drifted"
+        )
+        assert r["self_metric"]["confidence"] == exp["confidence"], (
+            f"{filename}: confidence drifted"
+        )
+
+        # Every pinned output field must match exactly.
+        for key, want in exp.get("output", {}).items():
+            assert r["output"].get(key) == want, (
+                f"{filename}: output[{key!r}] = {r['output'].get(key)!r}, want {want!r}"
+            )
+
+        # Optional extra self_metric pins (e.g. synthesis counts).
+        for key, want in exp.get("self_metric_extra", {}).items():
+            assert r["self_metric"].get(key) == want, (
+                f"{filename}: self_metric[{key!r}] = {r['self_metric'].get(key)!r}, want {want!r}"
+            )
+
+    def test_synthesis_defaults_unlabeled_change_attribution(self):
+        # Second change_list item carries no source_type in the sample; the
+        # organ must stamp the EU AI Act fallback attribution on it.
+        r = _run_sample("synthesis_attribution.json")
+        second = r["output"]["change_list"][1]
+        assert second["source_type"] == "unknown"
+        assert second["source_label"] == ""
+        # First item's explicit attribution must be preserved untouched.
+        assert r["output"]["change_list"][0]["source_type"] == "dfa_team"
+
+    def test_every_sample_is_pinned(self):
+        """Drift guard: the on-disk sample set and the pinned set must match
+        exactly, so a new/removed sample can't silently go unasserted."""
+        on_disk = {
+            f for f in os.listdir(_SAMPLES_DIR) if f.endswith(".json")
+        }
+        assert on_disk == set(_SAMPLE_EXPECTATIONS), (
+            "samples/ and _SAMPLE_EXPECTATIONS diverged — pin every sample's "
+            f"verdict. on_disk-only={on_disk - set(_SAMPLE_EXPECTATIONS)}, "
+            f"pins-only={set(_SAMPLE_EXPECTATIONS) - on_disk}"
+        )
 
 
 if __name__ == "__main__":
