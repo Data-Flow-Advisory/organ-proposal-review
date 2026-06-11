@@ -1,0 +1,10 @@
+{
+  "state": {
+    "kind": "team_review",
+    "persona_name": "Matt",
+    "session_result": {
+      "summary": "Reviewed the proposal.\n```json\n{\"perspective\": \"CTO / technical risk\", \"strong_points\": [\"clear migration path\"], \"concerns\": [\"no SLA on data sync\"], \"recommended_changes\": [\"add rollback plan\"], \"overall_strength\": 7}\n```\nThat is my assessment.",
+      "findings": []
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "state": {
+    "kind": "synthesis",
+    "parsed": {
+      "change_list": [
+        {"priority": "high", "action": "Add data-residency clause", "rationale": "Priya flagged GDPR", "source_type": "dfa_team", "source_label": "[DFA expert review: Priya]"},
+        {"priority": "medium", "action": "Soften the ROI claim"}
+      ],
+      "quote_weaving_map": [
+        {"quote": "we lose two days a week to manual reconciliation", "suggested_placement": "executive summary", "source_persona": "Dana"}
+      ],
+      "overall_readiness": 72
+    }
+  }
+}

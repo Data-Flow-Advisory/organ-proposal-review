@@ -1,0 +1,9 @@
+{
+  "state": {
+    "kind": "interviewee_review",
+    "person_name": "Dana Okoro",
+    "role": "Operations Manager",
+    "parsed": null,
+    "error": "model returned malformed JSON"
+  }
+}

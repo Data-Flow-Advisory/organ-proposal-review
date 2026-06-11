@@ -1,0 +1,9 @@
+{
+  "state": {
+    "kind": "status",
+    "found": true,
+    "synth_status": "pending",
+    "child_statuses": ["completed", "completed"],
+    "expected_child_count": 5
+  }
+}

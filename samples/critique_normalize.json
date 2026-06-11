@@ -1,0 +1,11 @@
+{
+  "state": {
+    "kind": "critique",
+    "persona_name": "Jordan",
+    "parsed": {
+      "strong_points": ["ROI framed against current spend"],
+      "concerns": "the payback period is vague",
+      "critical_changes": ["quantify year-1 savings"]
+    }
+  }
+}
