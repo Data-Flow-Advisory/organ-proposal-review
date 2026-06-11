@@ -1,0 +1,41 @@
+{
+  "_comment": "Connection-standard port contract for the proposal-review organ. inputs = the top-level keys decide() reads from `state` (verified by AST scan: exactly the state.get(\"X\") literals in organ.py). outputs = the top-level keys decide() writes under the result `output` dict (verified behaviourally as the union across the committed samples, which cover all 5 dispatched kinds). `context` overrides (persona_roles tuning) and nested keys (session_result.summary/findings, change_list item fields) are NOT ports. `kind` is the required discriminator; all other inputs are kind-specific and optional. Several names appear on both sides (persona_name, role, person_name, error) because the organ reads them from state and re-emits them normalized under output. Types map to the vendored types.json; reconcile names with the canonical orchestrator types.json once readable.",
+  "inputs": [
+    {"name": "kind", "type": "string", "required": true},
+    {"name": "persona_name", "type": "string", "required": false},
+    {"name": "session_result", "type": "object", "required": false},
+    {"name": "persona_roles", "type": "object", "required": false},
+    {"name": "parsed", "type": "object", "required": false},
+    {"name": "error", "type": "string", "required": false},
+    {"name": "person_name", "type": "string", "required": false},
+    {"name": "role", "type": "string", "required": false},
+    {"name": "found", "type": "boolean", "required": false},
+    {"name": "synth_status", "type": "string", "required": false},
+    {"name": "child_statuses", "type": "array", "required": false},
+    {"name": "expected_child_count", "type": "integer", "required": false}
+  ],
+  "outputs": [
+    {"name": "persona_name", "type": "string"},
+    {"name": "perspective", "type": "string"},
+    {"name": "strong_points", "type": "array"},
+    {"name": "concerns", "type": "array"},
+    {"name": "recommended_changes", "type": "array"},
+    {"name": "overall_strength", "type": "number"},
+    {"name": "ai_generated", "type": "boolean"},
+    {"name": "role", "type": "string"},
+    {"name": "critical_changes", "type": "array"},
+    {"name": "person_name", "type": "string"},
+    {"name": "agrees", "type": "array"},
+    {"name": "disagrees", "type": "array"},
+    {"name": "missing", "type": "array"},
+    {"name": "quotes", "type": "array"},
+    {"name": "error", "type": "string"},
+    {"name": "dfa_team_perspectives", "type": "array"},
+    {"name": "interviewee_perspectives", "type": "array"},
+    {"name": "change_list", "type": "array"},
+    {"name": "quote_weaving_map", "type": "array"},
+    {"name": "overall_readiness", "type": "number"},
+    {"name": "overall", "type": "string"},
+    {"name": "children_pending", "type": "boolean"}
+  ]
+}

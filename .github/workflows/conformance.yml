@@ -16,6 +16,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Verify ports contract (connection standard)
+        run: |
+          set -euo pipefail
+          echo "# Proposal Review Organ — Ports contract" >> "$GITHUB_STEP_SUMMARY"
+          python3 check_ports.py | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Shadow-run organ on samples
         run: |
           set -euo pipefail

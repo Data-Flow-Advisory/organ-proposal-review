@@ -1,0 +1,11 @@
+{
+  "_comment": "VENDORED type vocabulary. The canonical standard at Data-Flow-Advisory/orchestrator@feat/drift-gate (CONNECTORS.md + types.json) is unreachable to the fleet token (HTTP 404), so this organ vendors the JSON-primitive vocabulary to keep the conformance check self-contained. Type NAMES must be reconciled with the canonical orchestrator types.json once it is readable.",
+  "types": {
+    "string": {"json": "string", "desc": "UTF-8 text"},
+    "integer": {"json": "integer", "desc": "whole number"},
+    "number": {"json": "number", "desc": "int or float; may be null where the source coerces a non-number to None"},
+    "boolean": {"json": "boolean", "desc": "true/false"},
+    "object": {"json": "object", "desc": "JSON object / dict; may be null where the source treats absence as fail-open"},
+    "array": {"json": "array", "desc": "JSON array / list"}
+  }
+}

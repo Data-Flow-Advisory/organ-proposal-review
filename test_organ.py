@@ -12,6 +12,7 @@ Covers each dispatched kind plus the cross-cutting fail-open contract:
 
 import json
 import os
+import sys
 
 import pytest
 
@@ -502,6 +503,48 @@ class TestSamplesConform:
             f"verdict. on_disk-only={on_disk - set(_SAMPLE_EXPECTATIONS)}, "
             f"pins-only={set(_SAMPLE_EXPECTATIONS) - on_disk}"
         )
+
+
+class TestPortsContract:
+    """The connection-standard ports.json + check_ports.py guard.
+
+    Binds check_ports.py into the pytest run (it also runs as a dedicated
+    conformance step) so a ports/organ drift fails the suite locally too.
+    """
+
+    def test_ports_json_parses_and_has_shape(self):
+        with open(os.path.join(os.path.dirname(__file__), "ports.json")) as fh:
+            ports = json.load(fh)
+        assert isinstance(ports["inputs"], list) and ports["inputs"]
+        assert isinstance(ports["outputs"], list) and ports["outputs"]
+        for port in ports["inputs"]:
+            assert isinstance(port["name"], str) and port["name"]
+            assert isinstance(port["type"], str) and port["type"]
+            assert isinstance(port["required"], bool)
+        for port in ports["outputs"]:
+            assert isinstance(port["name"], str) and port["name"]
+            assert isinstance(port["type"], str) and port["type"]
+
+    def test_declared_types_in_vocabulary(self):
+        here = os.path.dirname(__file__)
+        with open(os.path.join(here, "ports.json")) as fh:
+            ports = json.load(fh)
+        with open(os.path.join(here, "types.json")) as fh:
+            vocab = set(json.load(fh)["types"].keys())
+        for side in ("inputs", "outputs"):
+            for port in ports[side]:
+                assert port["type"] in vocab, f"{port['name']}:{port['type']}"
+
+    def test_check_ports_passes(self):
+        import subprocess
+
+        proc = subprocess.run(
+            [sys.executable, "check_ports.py"],
+            cwd=os.path.dirname(__file__),
+            capture_output=True,
+            text=True,
+        )
+        assert proc.returncode == 0, proc.stderr + proc.stdout
 
 
 if __name__ == "__main__":

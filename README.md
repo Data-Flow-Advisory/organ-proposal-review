@@ -133,15 +133,43 @@ stamp `ai_generated: true`, and `synthesis` guarantees every actionable change
 carries a `source_type` / `source_label` so attribution can never silently go
 missing.
 
+## Ports contract (connection standard)
+
+`ports.json` declares the organ's wiring surface per the orchestrator
+connection standard (`CONNECTORS.md`): `inputs` are the top-level keys
+`decide()` reads from `state`, `outputs` are the top-level keys it writes
+under the result `output` dict. Each name maps to a type from the type
+vocabulary in `types.json`.
+
+This is a multi-operation organ (dispatched on `state.kind`), so a given
+call exercises only a subset of these ports; the contract is the **union**
+across all five kinds. `kind` is the required discriminator; every other
+input is kind-specific and optional. `context` overrides (e.g.
+`persona_roles`) and nested fields (`session_result.summary`, per-change
+attribution keys) are *not* ports.
+
+`check_ports.py` enforces the standard in CI: it asserts `ports.json` parses,
+every declared type exists in the vocabulary, `decide()` reads exactly the
+declared inputs (AST scan of `state.get(...)` literals), and the union of
+outputs produced across the committed samples equals the declared output set.
+
+> **Note:** the canonical standard
+> (`Data-Flow-Advisory/orchestrator@feat/drift-gate` `CONNECTORS.md` +
+> `types.json`) was unreachable when this contract was authored, so
+> `types.json` vendors the JSON-primitive vocabulary locally. Type *names*
+> should be reconciled with the canonical `types.json` once it is readable.
+
 ## Tests & conformance
 
 ```bash
-python3 -m pytest -v      # 47 tests
+python3 -m pytest -v      # organ + ports-contract tests
+python3 check_ports.py    # connection-standard port check (also a CI step)
 ```
 
-CI (`.github/workflows/conformance.yml`) shadow-runs the organ on every file
-in `samples/` and prints each verdict + `self_metric` to the job summary, then
-runs the test suite — report-only, no action taken.
+CI (`.github/workflows/conformance.yml`) verifies the ports contract, then
+shadow-runs the organ on every file in `samples/` and prints each verdict +
+`self_metric` to the job summary, then runs the test suite — report-only, no
+action taken.
 
 ## Provenance
 
