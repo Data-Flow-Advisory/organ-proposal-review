@@ -1,0 +1,41 @@
+{
+  "_comment": "Connection-standard ports for organ-proposal-review. This is a multi-op organ: decide() dispatches on state.kind, and each kind reads a different subset of these inputs and writes a different subset of these outputs. 'inputs' is the UNION of every state key read across all kinds (via state.get(...)); 'outputs' is the UNION of every key written under decide()'s result.output across all kinds. Types map to the vendored ./types.json vocabulary (the canonical orchestrator types.json was 404 — names pending reconciliation, see PR). 'kind' is the only universally-required input (the router discriminator); all other inputs are kind-conditional and null-tolerant (each has a documented fallback in organ.py), hence required=false. NOTE on outputs: the team_review/critique/interviewee_review/synthesis kinds normalize an already-parsed model dict and pass it through, so a real model 'parsed' dict MAY carry additional caller-supplied keys beyond this set; the declared outputs are the canonical keys the organ guarantees (sets via setdefault / always emits), which is exactly the set the committed conformance fixtures pin.",
+  "inputs": [
+    {"name": "kind", "type": "string", "required": true},
+    {"name": "persona_name", "type": "string", "required": false},
+    {"name": "session_result", "type": "object", "required": false},
+    {"name": "persona_roles", "type": "object", "required": false},
+    {"name": "parsed", "type": "object", "required": false},
+    {"name": "error", "type": "string", "required": false},
+    {"name": "person_name", "type": "string", "required": false},
+    {"name": "role", "type": "string", "required": false},
+    {"name": "found", "type": "boolean", "required": false},
+    {"name": "synth_status", "type": "string", "required": false},
+    {"name": "child_statuses", "type": "array", "required": false},
+    {"name": "expected_child_count", "type": "integer", "required": false}
+  ],
+  "outputs": [
+    {"name": "persona_name", "type": "string"},
+    {"name": "perspective", "type": "string"},
+    {"name": "strong_points", "type": "array"},
+    {"name": "concerns", "type": "array"},
+    {"name": "recommended_changes", "type": "array"},
+    {"name": "overall_strength", "type": "number"},
+    {"name": "ai_generated", "type": "boolean"},
+    {"name": "role", "type": "string"},
+    {"name": "critical_changes", "type": "array"},
+    {"name": "person_name", "type": "string"},
+    {"name": "agrees", "type": "array"},
+    {"name": "disagrees", "type": "array"},
+    {"name": "missing", "type": "array"},
+    {"name": "quotes", "type": "array"},
+    {"name": "dfa_team_perspectives", "type": "array"},
+    {"name": "interviewee_perspectives", "type": "array"},
+    {"name": "change_list", "type": "array"},
+    {"name": "quote_weaving_map", "type": "array"},
+    {"name": "overall_readiness", "type": "number"},
+    {"name": "overall", "type": "string"},
+    {"name": "children_pending", "type": "boolean"},
+    {"name": "error", "type": "string"}
+  ]
+}
