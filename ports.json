@@ -1,0 +1,14 @@
+{
+  "_README": "The typed studs for organ-proposal-review (the Lego coupling — see CONNECTORS.md). `inputs[].name` is the literal key decide() reads under `state`; `outputs[].name` is the literal key decide() writes (as a top-level field) under `output`. `type` names a connection type from the shared vocabulary (types.json). This organ is a MULTI-KIND DISPATCHER (state.kind selects one of five behaviours), so each port also carries a `kind` annotation naming the dispatch branch it belongs to — the conformance check is kind-aware and verifies each port against samples of its own kind. `kind` is the only dispatch/control field and is intentionally NOT a port (it is a discriminator, not a data wire — mirrors the precedent of excluding control fields). The per-reviewer label/control scalars (`persona_name`, `person_name`, `role`, `persona_roles`, `error`) and the `status`-kind job-state scalars (`found`, `synth_status`, `child_statuses`, `expected_child_count`) are likewise control inputs, not composable typed wires, so they are excluded from input ports (the `status` OUTPUT is still a composable typed value and is declared). For output ports the declared `name` is a WITNESS key — a field decide() unconditionally writes under `output` for that kind (present on both the normal and fail-open paths) — proving the typed fragment was emitted. Five of the referenced types (SessionResult, ModelJsonOutput, ProposalReviewPerspective, ProposalReviewSynthesis, ReviewJobStatus) are proposed additions to the vocabulary (marked `proposed` in types.json) pending upstream review.",
+  "inputs": [
+    {"name": "session_result", "type": "SessionResult", "required": false, "kind": "team_review"},
+    {"name": "parsed", "type": "ModelJsonOutput", "required": false, "kind": ["critique", "interviewee_review", "synthesis"]}
+  ],
+  "outputs": [
+    {"name": "recommended_changes", "type": "ProposalReviewPerspective", "kind": "team_review"},
+    {"name": "critical_changes", "type": "ProposalReviewPerspective", "kind": "critique"},
+    {"name": "agrees", "type": "ProposalReviewPerspective", "kind": "interviewee_review"},
+    {"name": "change_list", "type": "ProposalReviewSynthesis", "kind": "synthesis"},
+    {"name": "overall", "type": "ReviewJobStatus", "kind": "status"}
+  ]
+}

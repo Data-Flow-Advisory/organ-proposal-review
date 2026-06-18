@@ -29,6 +29,10 @@ jobs:
           else
             echo "No samples/ directory found" >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: Ports — ports.json declares typed studs that match the vocabulary and decide()'s real I/O
+        run: |
+          set -euo pipefail
+          python3 ports_check.py
       - name: Run tests
         run: |
           python -m pip install --quiet pytest
