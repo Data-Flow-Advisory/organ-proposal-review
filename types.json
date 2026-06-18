@@ -1,0 +1,11 @@
+{
+  "_comment": "VENDORED port-type vocabulary. The canonical vocabulary lives at Data-Flow-Advisory/orchestrator@feat/drift-gate/types.json (per CONNECTORS.md), which is UNREACHABLE to the fleet token (HTTP 404 on the whole orchestrator repo, 2026-06-11 — both CONNECTORS.md and types.json returned 404). These JSON-primitive type names are vendored so the conformance check is self-contained and green. The type *names* must be reconciled with the canonical orchestrator types.json once it is readable. See the PR description.",
+  "types": {
+    "string": "A UTF-8 text value.",
+    "integer": "A whole number.",
+    "number": "A numeric value (integer or float). May be null where the organ coerces a non-numeric to None.",
+    "boolean": "A true/false value.",
+    "object": "A JSON object (key/value map).",
+    "array": "An ordered JSON list."
+  }
+}
